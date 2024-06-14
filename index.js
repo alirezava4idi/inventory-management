@@ -3,11 +3,27 @@ const app = express()
 const PORT = process.env.PORT;
 
 
+
+
+const logger = require('./utils/logger.utils');
+const user_routes = require('./routes/users.routes');
+
+
+app.use(express.json());
+app.use(express.urlencoded( {extended: false }));
+app.use((req, res, next) => {
+    
+    logger.info(`${req.method} ${req.url}`)
+    next();
+})
+
 app.get('/api', (req, res) => {
     res.status(200).json({
         message: "Welcome to inventory management api!"
     })
 })
+
+app.use("/api/v1", user_routes)
 
 
 app.listen(PORT, () => {

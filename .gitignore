@@ -2,3 +2,4 @@ node_modules
 docker-compose.dev.yml
 .dockerignore
 .env
+logs
