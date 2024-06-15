@@ -21,7 +21,7 @@ const logger = winston.createLogger({
             filename: path.join(__dirname, "..", "/logs", "combined.log"),
             format: winston.format.printf((info) => {
                 return `${info.message} [${new Date().toString()}]`
-            })
+            }),
         }),
         new winston.transports.File({
             filename: path.join(__dirname, "..", "/logs", "errors.log"),
