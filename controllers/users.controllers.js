@@ -100,6 +100,11 @@ async function login(req, res)
             if (isPasswordValid)
             {
                 const token = jwt.sign({username}, process.env.TOKEN_SECRET, {expiresIn: '1d'})
+                const connection = await db_pool.getConnection();
+                const query = "UPDATE `users` SET `last_login` = ? WHERE `username` = ? LIMIT 1";
+                const [result, _fields] = await connection.execute(query, [new Date(), username]);
+                
+                connection.release();
                 res.status(200).json({
                     message: "welcome",
                     token
@@ -114,7 +119,8 @@ async function login(req, res)
             }
         }
         } catch (error) {
-            logger.error(`${ipAddr} - - internal server error`)
+            
+            logger.error(`${ipAddr} - - ${error.message}`)
                 res.status(500).json({
                     error: "internal server error"
                 })
