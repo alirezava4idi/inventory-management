@@ -3,6 +3,7 @@ const logger = require('../utils/logger.utils');
 const db_pool = require('../database/connection');
 
 const bcrypt = require('bcrypt');
+const jwt = require('jsonwebtoken');
 
 async function signup(req, res)
 {
@@ -36,12 +37,12 @@ async function signup(req, res)
             const [rows, _fields] = await connection.query(
                 query,
                 [0, username, hashPassword(password), new Date(), new Date()]);
-            console.log(rows)
-            console.log(hashPassword(password))
+            
             connection.release();   
+            const token = jwt.sign({username}, process.env.TOKEN_SECRET, {expiresIn: '1d'})
             res.status(201).json({
-                message: "User created!"
-
+                message: "User created!",
+                token: token
             })
             logger.info(`${ipAddr} - - successfull request`)
         } catch (error) {
