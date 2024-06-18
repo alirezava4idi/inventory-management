@@ -29,9 +29,10 @@ async function signup(req, res)
     }
     else
     {
-        username = username.toLowerCase();
         
         try {
+            username = username.toLowerCase();
+            const token = jwt.sign({username}, process.env.TOKEN_SECRET, {expiresIn: '1d'})
             const connection = await db_pool.getConnection();
             const query = "INSERT INTO `users` (`role`,`username`, `password`, `date_joined`, `last_login`) VALUES (?, ?, ?, ?, ?)"
             const [rows, _fields] = await connection.query(
@@ -39,14 +40,13 @@ async function signup(req, res)
                 [0, username, hashPassword(password), new Date(), new Date()]);
             
             connection.release();   
-            const token = jwt.sign({username}, process.env.TOKEN_SECRET, {expiresIn: '1d'})
             res.status(201).json({
                 message: "User created!",
                 token: token
             })
             logger.info(`${ipAddr} - - successfull request`)
         } catch (error) {
-            logger.error(error.message)
+            logger.error(ipAddr + " - - " + error.message)
             if (error.code == "ER_DUP_ENTRY")
             {
                 res.status(400).json({
@@ -71,11 +71,78 @@ function hashPassword(password)
     return hashed;
 }
 
+async function login(req, res)
+{
+    let username = (req.body.username + "").trim();
+    let password = (req.body.password + "").trim();
+    const ipAddr = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
+    if (username == "" || password == "" || username == 'undefined' || password == 'undefined')
+    {
+        logger.error(`${ipAddr} - - invalid username or password`)
+        res.status(400).json({
+            error: "invalid username or password"
+        })
+    }
+    else
+    {
+        try {
+            const user = await get_user_by_username(username);
+        if (user == undefined)
+        {
+            logger.error(`${ipAddr} - - username/password incorrect`)
+            res.status(400).json({
+                error: "invalid username or password"
+            })
+        }
+        else
+        {
+            const isPasswordValid = verifyPassword(password, user.password)
+            if (isPasswordValid)
+            {
+                const token = jwt.sign({username}, process.env.TOKEN_SECRET, {expiresIn: '1d'})
+                res.status(200).json({
+                    message: "welcome",
+                    token
+                })
+            }
+            else
+            {
+                logger.error(`${ipAddr} - - username/password incorrect`)
+                res.status(400).json({
+                    error: "invalid username or password"
+                })
+            }
+        }
+        } catch (error) {
+            logger.error(`${ipAddr} - - internal server error`)
+                res.status(500).json({
+                    error: "internal server error"
+                })
+        }
+        
+    }
+}
+
 function verifyPassword(password, hashed)
 {
     return bcrypt.compareSync(password, hashed)
 }
 
 
+async function get_user_by_username(username)
+{
+    const connection = await db_pool.getConnection();
+    const query = "SELECT * FROM users WHERE username = ?";
+    const [rows, _fields] = await connection.query(query, [username]);
+    connection.release();
+    if (rows != [])
+    {
+        return rows[0];
+    }else
+    {
+        return undefined;
+    }
+}
 
-module.exports = { signup };
+
+module.exports = { signup, login };
