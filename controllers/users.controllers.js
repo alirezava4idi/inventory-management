@@ -150,5 +150,10 @@ async function get_user_by_username(username)
     }
 }
 
+function upload_profile_pic(req, res){
+    res.status(200).json({})
+}
 
-module.exports = { signup, login };
+
+
+module.exports = { signup, login, upload_profile_pic };
