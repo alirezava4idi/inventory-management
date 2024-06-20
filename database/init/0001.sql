@@ -6,5 +6,5 @@ CREATE TABLE IF NOT EXISTS users (
     date_joined DATETIME DEFAULT CURRENT_TIMESTAMP,
     role INT(3),
     last_login DATETIME,
-    profile_pic VARCHAR(255)
+    avatar VARCHAR(255)
 )

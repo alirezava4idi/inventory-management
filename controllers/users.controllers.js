@@ -4,6 +4,9 @@ const db_pool = require('../database/connection');
 
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
+const multer = require('multer');
+const path = require('node:path');
+const sharp = require('sharp');
 
 async function signup(req, res)
 {
@@ -151,7 +154,51 @@ async function get_user_by_username(username)
 }
 
 function upload_profile_pic(req, res){
-    res.status(200).json({})
+    const ipAddr = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
+    
+    try {
+        const storage = multer.diskStorage({
+            destination: function (req, file, cb){
+                cb(null, path.join(__dirname, "..", "/uploads"))
+            },
+            filename: function (req, file, cb) {
+                const name = req.user.username + `.${file.originalname.split(".")[1]}`;
+                cb(null, name)
+            },
+            
+        })
+        const upload = multer( {storage: storage, limits: {fileSize: 2000000} } ).single('avatar');
+        
+        upload(req, res, async function (err) {
+            if (err instanceof multer.MulterError)
+            {
+                logger.error(`${ipAddr} - - ${err.message}`)
+                res.status(400).json({error: err.message})
+            }
+            else if (err)
+            {
+                logger.error(`${ipAddr} - - ${err.message}`)
+                res.status(500).json({err})
+
+            }
+            else
+            {
+                console.log(req.file, req.user.username)
+                const connection = await db_pool.getConnection();
+                const query = "UPDATE `users` SET `avatar` = ? WHERE `username` = ? LIMIT 1";
+                connection.query(query, [req.file.path, req.user.username]);
+                connection.release();
+                logger.info(`${ipAddr} - - avatar upload was successfull`)
+                res.status(200).json({
+                    message: "avatar was uploaded successfully"
+                })
+
+            }
+        })
+    } catch (error) {
+        res.status(500).json({error})
+    }
+    
 }
 
 

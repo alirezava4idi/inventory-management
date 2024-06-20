@@ -3,3 +3,4 @@ docker-compose.dev.yml
 .dockerignore
 .env
 logs
+uploads
