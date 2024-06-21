@@ -6,7 +6,8 @@ const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const multer = require('multer');
 const path = require('node:path');
-const sharp = require('sharp');
+
+const { get_user_by_username } = require('../utils/utils');
 
 async function signup(req, res)
 {
@@ -138,20 +139,7 @@ function verifyPassword(password, hashed)
 }
 
 
-async function get_user_by_username(username)
-{
-    const connection = await db_pool.getConnection();
-    const query = "SELECT * FROM users WHERE username = ?";
-    const [rows, _fields] = await connection.query(query, [username]);
-    connection.release();
-    if (rows != [])
-    {
-        return rows[0];
-    }else
-    {
-        return undefined;
-    }
-}
+
 
 function upload_profile_pic(req, res){
     const ipAddr = req.headers['x-forwarded-for'] || req.socket.remoteAddress;

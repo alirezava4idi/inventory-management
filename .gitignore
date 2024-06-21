@@ -4,3 +4,4 @@ docker-compose.dev.yml
 .env
 logs
 uploads
+bluprint.yaml
