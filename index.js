@@ -4,7 +4,6 @@ const PORT = process.env.PORT;
 
 
 
-
 const logger = require('./utils/logger.utils');
 const user_routes = require('./routes/users.routes');
 const catagories_routes = require('./routes/catagories.routes');
