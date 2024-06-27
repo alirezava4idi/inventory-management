@@ -2,6 +2,8 @@
 const db_pool = require('../database/connection');
 const logger = require('../utils/logger.utils');
 
+const {change_time_zone} = require('../utils/utils');
+
 async function get_all_catagories(req, res)
 {
     try {
@@ -102,11 +104,7 @@ async function get_catagory_by_id(req, res)
     }
 }
 
-function change_time_zone(date, tz)
-{
-    return new Date((typeof date === "string" ? new Date(date) : date).toLocaleString("en-US", {timeZone: tz}));   
 
-}
 
 async function find_catagory_by_id(catagory_id)
 {

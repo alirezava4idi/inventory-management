@@ -14,5 +14,10 @@ async function get_user_by_username(username)
         return undefined;
     }
 }
+function change_time_zone(date, tz)
+{
+    return new Date((typeof date === "string" ? new Date(date) : date).toLocaleString("en-US", {timeZone: tz}));   
 
-module.exports = { get_user_by_username }
+}
+
+module.exports = { get_user_by_username, change_time_zone }

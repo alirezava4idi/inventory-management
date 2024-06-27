@@ -7,6 +7,7 @@ const PORT = process.env.PORT;
 const logger = require('./utils/logger.utils');
 const user_routes = require('./routes/users.routes');
 const catagories_routes = require('./routes/catagories.routes');
+const products_routes = require('./routes/products.routes');
 
 app.use(express.json());
 app.use(express.urlencoded( {extended: false }));
@@ -24,6 +25,7 @@ app.get('/api', (req, res) => {
 
 app.use("/api/v1", user_routes)
 app.use("/api/v1/catagories", catagories_routes);
+app.use("/api/v1/products", products_routes);
 
 app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`)
