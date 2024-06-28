@@ -217,4 +217,50 @@ async function update_product_by_id(req, res)
     }
 }
 
-module.exports = {get_all_products, create_product, get_product_by_id, update_product_by_id}
+async function delete_product_by_id(req, res)
+{
+    try {
+        let productId = (req.params.productId).trim();
+        productId = Number(productId) ? Number(productId) : -1;
+        if (productId == null || productId == 'null' || productId == -1)
+        {
+            logger.error("invalid id in url");
+            res.status(400).json({
+                error: ['bad product id']
+            })
+        }else
+        {
+            
+            const product = await find_product_by_id(productId);
+            if (product.length == 0)
+            {
+                logger.info("Product not found");
+                res.status(404).json({
+                    message: "Product not found"
+                })
+            }else
+            {
+                const connection = await db_pool.getConnection();
+                const query = "DELETE FROM product WHERE id = ? LIMIT 1";
+                const [rows, _fields] = await connection.query(query, [productId]);
+                connection.release()
+                if (rows.affectedRows == 1)
+                {
+                    res.status(204).json({
+                        message: "Product deleted successfully"
+                    });
+                }else
+                {
+                    throw new Error()
+                }
+            }
+        }
+    } catch (error) {
+        logger.error(error.message);
+        res.status(500).json({
+            error: ['internal server error']
+        })
+    }
+}
+
+module.exports = {get_all_products, create_product, get_product_by_id, update_product_by_id, delete_product_by_id}
