@@ -2,6 +2,7 @@ const db_pool = require('../database/connection');
 const {change_time_zone} = require('../utils/utils');
 const logger = require('../utils/logger.utils');
 
+const { find_catagory_by_id } = require('./catagories.controllers');
 
 async function get_all_products(req, res)
 {
@@ -30,4 +31,59 @@ async function get_all_products(req, res)
     }
 }
 
-module.exports = {get_all_products,}
+async function create_product(req, res)
+{
+    try {
+        const name = (req.body.name + '').trim();
+        const description = (req.body.description + '').trim();
+        const price = Number(req.body.price).toFixed(2);
+        const catagoryId = Number(req.body.catagoryId) ? Number(req.body.catagoryId) : -1;
+
+        console.log(name, description, price, catagoryId);
+        if (name == 'undefined' || name == undefined || name == '' 
+            || price == 'NaN' || catagoryId == 'NaN' || catagoryId == NaN 
+            || price == '' || catagoryId == '' || catagoryId == -1)
+        {
+            logger.error('invalid name or price or catagoryId')
+            res.status(400).json({
+                error: ['invalid request params']
+            })
+        }
+        else
+        {
+            const catagory = await find_catagory_by_id(catagoryId)
+            if (catagory.length == 0)
+            {
+                logger.error('catagory does not exist')
+                res.status(404).json({
+                    error: ['catagory does not exist']
+                })
+            }
+            else
+            {
+                const connection = await db_pool.getConnection();
+                const query = "INSERT INTO product (name, description, price, catagoryId,created_at, updated_at) VALUES (?,?,?,?,?,?);";
+                const [rows, _fields] = await connection.query(query, [name, description, price, catagoryId, new Date(), new Date()]);
+                connection.release();
+                logger.info("product created")
+                res.status(201).json({
+                    product: {
+                        name,
+                        description,
+                        price,
+                        catagoryId,
+                    }
+                })
+            }
+        }
+
+
+    } catch (error) {
+        logger.error(error.message);
+        res.status(500).json({
+            error: ["internal server error"]
+        })
+    }
+}
+
+module.exports = {get_all_products, create_product, }

@@ -221,4 +221,4 @@ async function delete_catagory(req, res)
         })
     }
 }
-module.exports = { get_all_catagories, create_new_catagory, get_catagory_by_id, update_catagory, delete_catagory}
+module.exports = { get_all_catagories, create_new_catagory, get_catagory_by_id, update_catagory, delete_catagory, find_catagory_by_id}
