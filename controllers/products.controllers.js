@@ -3,6 +3,7 @@ const {change_time_zone} = require('../utils/utils');
 const logger = require('../utils/logger.utils');
 
 const { find_catagory_by_id } = require('./catagories.controllers');
+const e = require('express');
 
 async function get_all_products(req, res)
 {
@@ -86,4 +87,57 @@ async function create_product(req, res)
     }
 }
 
-module.exports = {get_all_products, create_product, }
+async function find_product_by_id(productId)
+{
+    try {
+        const connection = await db_pool.getConnection();
+        const query = "SELECT * FROM product WHERE id = ? LIMIT 1;";
+        const [rows, _fields] = await connection.query(query, [productId]);
+        connection.release();
+        return rows;
+    } catch (error) {
+        logger.error(error.message);
+        res.status(500).json({
+            error: ["internal server error"]
+        })
+    }
+}
+
+async function get_product_by_id(req, res)
+{
+    try {
+        let productId = (req.params.productId).trim();
+        productId = Number(productId) ? Number(productId) : -1;
+        if (productId == null || productId == 'null' || productId == -1)
+        {
+            logger.error("invalid id in url");
+            res.status(400).json({
+                error: ['bad product id']
+            })
+        }else
+        {
+            
+            const product = await find_product_by_id(productId);
+            if (product.length == 0)
+            {
+                logger.info("Product not found");
+                res.status(404).json({
+                    message: "Product not found"
+                })
+            }else
+            {
+                logger.info("Retrieve details of a specific product by its ID");
+                res.status(200).json({
+                    ...product[0]
+                })
+            }
+        }
+    } catch (error) {
+        logger.error(error.message);
+        res.status(500).json({
+            error: ['internal server error']
+        })
+    }
+}
+
+module.exports = {get_all_products, create_product, get_product_by_id,}
