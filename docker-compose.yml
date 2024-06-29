@@ -1,0 +1,39 @@
+services:
+  nginx:
+    image: docker.arvancloud.ir/nginx:stable-alpine
+    volumes:
+      - ./nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
+    
+    ports:
+      - "80:80"
+  api:
+    build: 
+      context: .
+      args:
+        - NODE_ENV=development
+    depends_on:
+      - nginx
+    
+    volumes:
+      - ./:/app
+      - /app/node_modules
+
+    environment:
+      - PORT=3000
+    
+    command: npm run dev
+
+  
+  db:
+    image: docker.arvancloud.ir/mysql:8.0
+    volumes:
+      - ./database/init:/docker-entrypoint-initdb.d
+    environment:
+      - MYSQL_ROOT_PASSWORD=789456123
+      - MYSQL_DATABASE=db
+      - MYSQL_USER=brad
+      - MYSQL_PASSWORD=12345
+    
+    depends_on:
+      - api
+    
