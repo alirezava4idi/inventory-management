@@ -5,6 +5,6 @@ const protect = require('../middlewares/auth.middleware');
 const inventory_controller = require('../controllers/inventory.controllers');
 
 router.route('/').get(protect, inventory_controller.get_inventory_levels);
-// router.route('/').post(protect)
+router.route('/:productId').get(protect, inventory_controller.get_inventory_level_product)
 
 module.exports = router;

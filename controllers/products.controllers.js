@@ -62,8 +62,15 @@ async function create_product(req, res)
             else
             {
                 const connection = await db_pool.getConnection();
-                const query = "INSERT INTO product (name, description, price, catagoryId,created_at, updated_at) VALUES (?,?,?,?,?,?);";
-                const [rows, _fields] = await connection.query(query, [name, description, price, catagoryId, new Date(), new Date()]);
+                
+                let query = "INSERT INTO product (name, description, price, catagoryId,created_at, updated_at) VALUES (?,?,?,?,?,?);";
+                const [rows_prodcut, _fields] = await connection.query(query, [name, description, price, catagoryId, new Date(), new Date()]);
+                if (rows_prodcut.affectedRows == 1)
+                {
+                    let query = "INSERT INTO inventory (productId, quantity, created_at, updated_at) VALUES (?,?,?,?);"
+                    const [rows, _fields] = await connection.query(query, [rows_prodcut.insertId, 0, new Date(), new Date()])
+
+                }
                 connection.release();
                 logger.info("product created")
                 res.status(201).json({
@@ -263,4 +270,4 @@ async function delete_product_by_id(req, res)
     }
 }
 
-module.exports = {get_all_products, create_product, get_product_by_id, update_product_by_id, delete_product_by_id}
+module.exports = {get_all_products, create_product, get_product_by_id, update_product_by_id, delete_product_by_id, find_product_by_id}
