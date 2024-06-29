@@ -26,6 +26,8 @@ CREATE TABLE IF NOT EXISTS product (
     created_at DATETIME NOT NULL,
     updated_at DATETIME NOT NULL,
     FOREIGN KEY (catagoryId) REFERENCES catagory(id)
+        ON DELETE CASCADE
+        ON UPDATE CASCADE
 );
 
 CREATE TABLE IF NOT EXISTS inventory (
@@ -35,4 +37,6 @@ CREATE TABLE IF NOT EXISTS inventory (
     created_at DATETIME NOT NULL,
     updated_at DATETIME NOT NULL,
     FOREIGN KEY (productId) REFERENCES product(id)
+        ON DELETE CASCADE
+        ON UPDATE CASCADE
 );
