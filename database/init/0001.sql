@@ -27,3 +27,12 @@ CREATE TABLE IF NOT EXISTS product (
     updated_at DATETIME NOT NULL,
     FOREIGN KEY (catagoryId) REFERENCES catagory(id)
 );
+
+CREATE TABLE IF NOT EXISTS inventory (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    productId INT NOT NULL,
+    quantity INT DEFAULT 0,
+    created_at DATETIME NOT NULL,
+    updated_at DATETIME NOT NULL,
+    FOREIGN KEY (productId) REFERENCES product(id)
+);
