@@ -11,23 +11,29 @@ services:
       context: .
       args:
         - NODE_ENV=development
+    
+    #These shoud not exist in a production env 
+    environment:
+      - PORT=3000
+      - TZ=GMT-1BST
+      - REFRESH_TOKEN_SECRET=changeittosomethinglaksdakjsdhaskdjhasasdaweawaw534634
+      - TOKEN_SECRET=changeittosomethinglaksdakjsdhaskdjhasasdasdadasd
     depends_on:
       - nginx
     
     volumes:
       - ./:/app
       - /app/node_modules
-
-    environment:
-      - PORT=3000
     
-    command: npm run dev
+    command: npm start
 
   
   db:
     image: docker.arvancloud.ir/mysql:8.0
     volumes:
       - ./database/init:/docker-entrypoint-initdb.d
+    
+    #These shoud not exist in a production env
     environment:
       - MYSQL_ROOT_PASSWORD=789456123
       - MYSQL_DATABASE=db
