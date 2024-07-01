@@ -1,0 +1,1 @@
+To Run This app, Enter The Command *** docker-compose run --build ***
